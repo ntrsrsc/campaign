@@ -1,0 +1,37 @@
+<html>
+
+<head>
+    <!--script src="web3.js"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const address = "0x9ee860E6fB1784A30eB98bC1C550F7b5159531D7";
+        //--------------------------------
+        // No longer supported (start from Nov 20, 2020)
+        //const provider = window.web3.currentProvider; ใช้สำหรับ matamak สมัยก่อน อัพเดทใหม่วันที่ 20 เดือนนี้
+        //const web3 = new Web3(provider);
+        //--------------------------------
+
+        const web3 = new Web3(Web3.givenProvider); //ใช้ตัวนี้แทนตัวที่ถูกยกเลิกใช้ไป
+        const mnemonic = "***"
+        const truffleURL = "***"
+
+        window.addEventListener("load", async () => {
+            if (typeof web3 === "undefined") {
+                alert("Metamask is not installed, you cannot use this app");
+            } else {
+                window.ethereum
+            .enable(); 
+                await getAccounts();
+            }
+        });
+    </script>
+</head>
+
+<body>
+    </head>
+
+    <body>
+     
+    </body>
+
+</html>

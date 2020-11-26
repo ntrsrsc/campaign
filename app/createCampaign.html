@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <!--script src="web3.js"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const address = "0xF08F9bFCad0C71cBf1F81178126607D5dD924579";
+        //--------------------------------
+        // No longer supported (start from Nov 20, 2020)
+        //const provider = window.web3.currentProvider; ใช้สำหรับ matamak สมัยก่อน อัพเดทใหม่วันที่ 20 เดือนนี้
+        //const web3 = new Web3(provider);
+        //--------------------------------
+
+        const web3 = new Web3(Web3.givenProvider); //ใช้ตัวนี้แทนตัวที่ถูกยกเลิกใช้ไป
+        const mnemonic = "***"
+        const truffleURL = "***"
+
+        window.addEventListener("load", async () => {
+            if (typeof web3 === "undefined") {
+                alert("Metamask is not installed, you cannot use this app");
+            } else {
+                window.ethereum
+            .enable(); 
+                await getAccounts();
+            }
+        });
+        const campaignFactory_abi = [{
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "minimum",
+                "type": "uint256"
+            }],
+            "name": "createCampaign",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }, {
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }],
+            "name": "deployedCampaigns",
+            "outputs": [{
+                "internalType": "contract Campaign",
+                "name": "",
+                "type": "address"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }, {
+            "inputs": [],
+            "name": "getDeployedCampaigns",
+            "outputs": [{
+                "internalType": "contract Campaign[]",
+                "name": "",
+                "type": "address[]"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }]
+
+        var campaignFactory = new web3.eth.Contract(campaignFactory_abi, address);
+
+        const createCampaign = async () => {
+            const accounts = await web3.eth.getAccounts();
+            const minCon = parseInt(document.getElementById("minCon").value);
+            await campaignFactory.methods.createCampaign(minCon).send({from:accounts[0]});
+            document.getElementById("createCampaigns").innerHTML = "Campaign is created";
+        };
+        const getDeployed = async () => {
+            const deployed = await campaignFactory.methods.getDeployedCampaigns().call();
+            var campaignList = '';
+                for (i = 0; i < deployed.length; i++) {
+                        campaignList += '<li>' + deployed[i] + '</li>';
+                }
+            document.getElementById("getDeployedCampaigns").innerHTML = campaignList;
+        };
+
+
+    </script>
+</head>
+
+<body>
+    </head>
+
+    <body>
+   
+    <h2>Create campaign</h2>
+        Minimum Contribution :  <input type="number" id="minCon" />
+        <button type="button" onclick="createCampaign()" class="button">Create Campaign</button>
+        <button type="button" onclick="getDeployed()" class="button">Get Campaign List</button><br /><br />
+        <hr>
+        <div id="createCampaigns"></div>
+        <br>
+        <div id="getDeployedCampaigns"></div>
+    
+
+        
+         
+    </body>
+
+</html>

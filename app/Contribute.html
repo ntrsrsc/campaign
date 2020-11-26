@@ -1,0 +1,214 @@
+<html>
+
+<head>
+    <!--script src="web3.js"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const address = "0xF08F9bFCad0C71cBf1F81178126607D5dD924579";
+        //--------------------------------
+        // No longer supported (start from Nov 20, 2020)
+        //const provider = window.web3.currentProvider; ใช้สำหรับ matamak สมัยก่อน อัพเดทใหม่วันที่ 20 เดือนนี้
+        //const web3 = new Web3(provider);
+        //--------------------------------
+
+        const web3 = new Web3(Web3.givenProvider); 
+        const mnemonic = "***"
+        const truffleURL = "***"
+
+        window.addEventListener("load", async () => {
+            if (typeof web3 === "undefined") {
+                alert("Metamask is not installed, you cannot use this app");
+            } else {
+                window.ethereum
+            .enable(); 
+                await getAccounts();
+            }
+        });
+
+        const campaign_abi = [{
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "minimum",
+                "type": "uint256"
+            }, {
+                "internalType": "address",
+                "name": "creator",
+                "type": "address"
+            }],
+            "stateMutability": "payable",
+            "type": "constructor"
+        }, {
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            }],
+            "name": "approveRequest",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }, {
+            "inputs": [{
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }],
+            "name": "approvers",
+            "outputs": [{
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }, {
+            "inputs": [],
+            "name": "contribute",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        }, {
+            "inputs": [{
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            }, {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }, {
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+            }],
+            "name": "createRequest",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }, {
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            }],
+            "name": "finalizeRequest",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        }, {
+            "inputs": [],
+            "name": "manager",
+            "outputs": [{
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }, {
+            "inputs": [],
+            "name": "minimumContribution",
+            "outputs": [{
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }, {
+            "inputs": [{
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }],
+            "name": "requests",
+            "outputs": [{
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            }, {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }, {
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+            }, {
+                "internalType": "bool",
+                "name": "complete",
+                "type": "bool"
+            }, {
+                "internalType": "uint256",
+                "name": "approvalCount",
+                "type": "uint256"
+            }],
+            "stateMutability": "view",
+            "type": "function"
+        }]
+
+        var campaign;      
+        const ListCampaign = async () => {
+            const address = document.getElementById("campaignAddr").value;
+            campaign = new web3.eth.Contract(campaign_abi, address);
+            const minCon = await campaign.methods.minimumContribution().call();
+            document.getElementById("getMinCon").innerHTML = 'Minimum Contribute is : '+minCon;
+        };      
+        
+        const becomeContribute = async () => {
+            const accounts = await web3.eth.getAccounts();
+            const balance = document.getElementById("balance").value;
+            await campaign.methods.contribute().send({from:accounts[0],value:web3.utils.toWei(balance, "wei")})
+            document.getElementById("becomeContribute").innerHTML = "You become contribute";
+        }
+
+        const showRequest = async () => {
+            const index = document.getElementById("index").value;
+            const request = await campaign.methods.requests(index).call();
+            document.getElementById("showRequest").innerHTML = "<p><b>Request Description</b></p>" + "description : "+JSON.stringify(request[0])
+            + "<br>amount : "+JSON.stringify(request[1])+ "<br>recipient : "+JSON.stringify(request[2])+ "<br>complete : "+JSON.stringify(request[3])
+            + "<br>approvalCount : "+JSON.stringify(request[4]);
+        };
+
+        const approveRequest = async () => {
+            const accounts = await web3.eth.getAccounts();
+            const index = document.getElementById("approveIndex").value;
+            await campaign.methods.approveRequest(index).send({from:accounts[0]})
+            document.getElementById("approveRequest").innerHTML = "Approved";
+        }
+
+    </script>
+</head>
+
+<body>
+    </head>
+
+    <body>
+            <h2>Wanna become contribute?</h2>
+            <p><b>Insert Campaign Address that you interest</b></p>
+            Campaign Address: <input type="text" id="campaignAddr" size="44"/>
+            <button type="button" onclick="ListCampaign()" >Choose this campaign</button>
+            <div id="getMinCon" ></div>
+            <br />
+            
+            How much ether do you need to enter (>= Minimum Contribute from above ) : <input type="number" id="balance" size="26" />    
+            <button type="button" onclick="becomeContribute()" >Become Contribute</button>
+            <div id="becomeContribute" ></div>
+            <hr>
+
+            <h4>Find Request by Index</h4>
+            Request index : <input type="text" id="index" />
+            <button type="button" onclick="showRequest()" >Show Request</button>
+            <div id="showRequest" ></div>
+            <hr>
+
+            <h4>Aproval Request</h4>  
+            Request Index: <input type="text" id="approveIndex" size="24"/>
+            <button type="button" onclick="approveRequest()" >Approved Request</button>
+            <div id="approveRequest" ></div>
+            <div id="showRequest" ></div>
+
+
+    </body>
+
+</html>
